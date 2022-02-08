@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="text_size_xsmall" type="dimen">12sp</item>
+    <item name="text_size_small" type="dimen">14sp</item>
+    <item name="text_size_normal" type="dimen">15sp</item>
+    <item name="text_size_medium" type="dimen">20sp</item>
+    <item name="text_size_large" type="dimen">24sp</item>
+    <item name="text_size_xlarge" type="dimen">28sp</item>
+    <item name="text_size_big" type="dimen">32sp</item>
+
+    <item name="space_size_xsmall" type="dimen">4dp</item>
+    <item name="space_size_small" type="dimen">8dp</item>
+    <item name="space_size_normal" type="dimen">16dp</item>
+    <item name="space_size_medium" type="dimen">24dp</item>
+    <item name="space_size_large" type="dimen">32dp</item>
+    <item name="space_size_xlarge" type="dimen">40dp</item>
+    <item name="space_size_big" type="dimen">48dp</item>
+</resources>

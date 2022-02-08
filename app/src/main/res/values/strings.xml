@@ -1,3 +1,10 @@
 <resources>
-    <string name="app_name">livewords</string>
+    <string name="app_name">Livewords</string>
+    <string name="error_permission_denied_message">Cannot access camera! Please grant permission in order to begin translation</string>
+    <string name="enable">Enable</string>
+    <string name="later">Later</string>
+    <string name="story_set_attribution"><a href="https://storyset.com/">Illustration by Storyset</a>
+</string>
+    <string name="welcome_message">Welcome to Livewords.</string>
+    <string name="permission_message">To fully benefit from the app we invite you to enable camera access.</string>
 </resources>
