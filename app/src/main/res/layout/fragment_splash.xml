@@ -5,6 +5,9 @@
 
     <data>
 
+        <variable
+            name="viewModel"
+            type="com.atidevs.livewords.splash.SplashViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -32,8 +35,9 @@
                     android:layout_marginStart="@dimen/space_size_normal"
                     android:layout_marginTop="@dimen/space_size_medium"
                     android:layout_marginEnd="@dimen/space_size_normal"
+                    android:fontFamily="@font/ubuntu_bold"
                     android:text="@string/welcome_message"
-                    android:textSize="@dimen/text_size_xlarge"
+                    android:textSize="@dimen/text_size_large"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -45,6 +49,7 @@
                     android:layout_marginStart="@dimen/space_size_normal"
                     android:layout_marginTop="@dimen/space_size_normal"
                     android:layout_marginEnd="@dimen/space_size_normal"
+                    android:fontFamily="@font/ubuntu_light"
                     android:text="@string/permission_message"
                     android:textSize="@dimen/text_size_normal"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -84,6 +89,7 @@
             android:layout_marginStart="@dimen/space_size_normal"
             android:layout_marginEnd="@dimen/space_size_normal"
             android:layout_marginBottom="@dimen/space_size_small"
+            android:enabled="@{!viewModel.showLoading}"
             android:paddingVertical="@dimen/space_size_normal"
             android:text="@string/enable"
             app:layout_constraintBottom_toTopOf="@id/action_later_permission"
@@ -97,12 +103,39 @@
             android:layout_marginStart="@dimen/space_size_normal"
             android:layout_marginEnd="@dimen/space_size_normal"
             android:layout_marginBottom="@dimen/space_size_normal"
+            android:enabled="@{!viewModel.showLoading}"
+            android:onClick="@{() -> viewModel.navigateToTextBasedExperience()}"
             android:paddingVertical="@dimen/space_size_normal"
             android:text="@string/later"
             android:textSize="@dimen/text_size_normal"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/loading"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.9"
+            android:background="@color/gray"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible">
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

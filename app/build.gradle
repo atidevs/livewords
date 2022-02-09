@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'androidx.navigation.safeargs'
 }
 
 android {
@@ -52,4 +53,15 @@ dependencies {
     implementation("androidx.camera:camera-view:1.1.0-beta01")
     // the CameraX Extensions library
     implementation("androidx.camera:camera-extensions:1.1.0-beta01")
+
+    // ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0")
+    // LiveData
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.4.0")
+    // Annotation processor
+    implementation("androidx.lifecycle:lifecycle-common-java8:2.4.0")
+
+    // Navigation
+    implementation("androidx.navigation:navigation-fragment-ktx:2.4.0")
+    implementation("androidx.navigation:navigation-ui-ktx:2.4.0")
 }

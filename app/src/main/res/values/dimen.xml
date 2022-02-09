@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="text_size_xsmall" type="dimen">12sp</item>
+    <item name="text_size_xsmall" type="dimen">10sp</item>
     <item name="text_size_small" type="dimen">14sp</item>
     <item name="text_size_normal" type="dimen">15sp</item>
     <item name="text_size_medium" type="dimen">20sp</item>

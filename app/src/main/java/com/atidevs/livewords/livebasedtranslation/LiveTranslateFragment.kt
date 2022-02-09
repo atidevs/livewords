@@ -1,4 +1,4 @@
-package com.atidevs.livewords
+package com.atidevs.livewords.livebasedtranslation
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,15 +10,18 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
-import com.atidevs.livewords.databinding.FragmentTranslateBinding
+import androidx.lifecycle.ViewModelProvider
+import com.atidevs.livewords.databinding.FragmentLiveTranslateBinding
 import com.google.common.util.concurrent.ListenableFuture
 
-class TranslateFragment() : Fragment() {
+class LiveTranslateFragment() : Fragment() {
 
-    private var _binding: FragmentTranslateBinding? = null
+    private var _binding: FragmentLiveTranslateBinding? = null
     private val binding get() = _binding!!
 
     lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
+
+    private var liveTranslateViewModel: LiveTranslateViewModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,31 +33,17 @@ class TranslateFragment() : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentTranslateBinding.inflate(inflater, container, false)
+        _binding = FragmentLiveTranslateBinding.inflate(inflater, container, false)
+        liveTranslateViewModel = ViewModelProvider(this)[LiveTranslateViewModel::class.java]
+        initCameraPreview()
         return binding.root
     }
 
-    fun handlePermission(isGranted: Boolean) {
-        if (isGranted) {
-            binding.previewContainer.visibility = View.VISIBLE
-            binding.errorContainer.visibility = View.GONE
-
-            cameraProviderFuture.addListener({
-                val cameraProvider = cameraProviderFuture.get()
-                bindPreview(cameraProvider)
-            }, ContextCompat.getMainExecutor(requireContext()))
-        } else {
-            binding.previewContainer.visibility = View.GONE
-            binding.errorContainer.visibility = View.VISIBLE
-            binding.enablePermissionAction.setOnClickListener {
-                (requireActivity() as? MainActivity)?.launchPermissionDialog()
-            }
-        }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    private fun initCameraPreview() {
+        cameraProviderFuture.addListener({
+            val cameraProvider = cameraProviderFuture.get()
+            bindPreview(cameraProvider)
+        }, ContextCompat.getMainExecutor(requireContext()))
     }
 
     private fun bindPreview(cameraProvider: ProcessCameraProvider) {
@@ -68,5 +57,10 @@ class TranslateFragment() : Fragment() {
         preview.setSurfaceProvider(binding.previewView.surfaceProvider)
 
         val camera = cameraProvider.bindToLifecycle(this as LifecycleOwner, cameraSelector, preview)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
