@@ -5,4 +5,6 @@
     <string name="story_set_attribution">Illustration by Storyset</string>
     <string name="welcome_message">Welcome to Livewords.</string>
     <string name="permission_message">To fully benefit from the app we invite you to enable camera access.</string>
+    <string name="content_desc_translation_api_attribution">Powered by Google Translate</string>
+    <string name="label_source_language">Source language</string>
 </resources>
