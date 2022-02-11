@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -10,25 +11,21 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <FrameLayout
-            android:id="@+id/previewContainer"
+        <androidx.camera.view.PreviewView
+            android:id="@+id/previewView"
             android:layout_width="match_parent"
             android:layout_height="400dp"
-            android:visibility="visible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <androidx.camera.view.PreviewView
-                android:id="@+id/previewView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <SurfaceView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-        </FrameLayout>
+        <SurfaceView
+            android:id="@+id/surfaceView"
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/sourceLang"
@@ -37,22 +34,31 @@
             android:layout_marginHorizontal="@dimen/space_size_normal"
             android:layout_marginVertical="@dimen/space_size_small"
             android:text="@string/label_source_language"
+            android:textSize="@dimen/text_size_normal"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/previewContainer" />
+            app:layout_constraintTop_toBottomOf="@id/previewView" />
 
         <ScrollView
             android:id="@+id/sourceTextContainer"
             android:layout_width="match_parent"
-            android:layout_height="80dp"
+            android:layout_height="120dp"
             android:layout_marginHorizontal="@dimen/space_size_normal"
-            app:layout_constraintStart_toEndOf="parent"
+            android:layout_marginVertical="@dimen/space_size_small"
+            android:fillViewport="true"
+            android:scrollbars="vertical"
+            app:layout_constraintBottom_toTopOf="@id/targetLangSpinner"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/sourceLang">
+            app:layout_constraintTop_toBottomOf="@id/sourceLang"
+            app:layout_constraintVertical_bias="0.0">
 
             <TextView
                 android:id="@+id/sourceText"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/text_size_medium"
+                tools:text="Source Text" />
 
         </ScrollView>
 
@@ -62,35 +68,48 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/space_size_normal"
             android:layout_marginTop="@dimen/space_size_small"
+            app:layout_constraintBottom_toTopOf="@id/targetTextContainer"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/sourceTextContainer" />
+            app:layout_constraintTop_toBottomOf="@id/sourceTextContainer"
+            app:layout_constraintVertical_bias="0.0"
+            tools:listitem="@android:layout/simple_list_item_1" />
 
         <ScrollView
             android:id="@+id/targetTextContainer"
             android:layout_width="match_parent"
-            android:layout_height="80dp"
+            android:layout_height="0dp"
             android:layout_marginHorizontal="@dimen/space_size_normal"
-            android:layout_marginVertical="@dimen/space_size_small"
+            android:layout_marginTop="@dimen/space_size_normal"
+            android:layout_marginBottom="@dimen/space_size_small"
+            android:fillViewport="true"
+            android:scrollbars="vertical"
+            app:layout_constraintBottom_toBottomOf="@id/attribution"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/targetLangSpinner">
 
             <TextView
                 android:id="@+id/targetText"
                 android:layout_width="match_parent"
-                android:layout_height="80dp" />
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/text_size_medium"
+                tools:text="Target Text" />
 
         </ScrollView>
 
         <ImageView
+            android:id="@+id/attribution"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/space_size_normal"
+            android:layout_marginBottom="@dimen/space_size_normal"
             android:contentDescription="@string/content_desc_translation_api_attribution"
             android:src="@drawable/translation_api_attribution"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/targetTextContainer"
+            app:layout_constraintVertical_bias="100" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

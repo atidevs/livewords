@@ -54,7 +54,7 @@ class LiveTranslateFragment : Fragment() {
     private fun init() {
         liveTranslateViewModel.identifyLanguage()
         liveTranslateViewModel.sourceText.observe(viewLifecycleOwner) {
-            binding.sourceLang.text = it
+            binding.sourceText.text = it
         }
     }
 
