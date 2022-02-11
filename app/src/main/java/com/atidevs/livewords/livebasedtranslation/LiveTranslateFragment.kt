@@ -16,6 +16,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
 import com.atidevs.livewords.R
 import com.atidevs.livewords.common.ScopedExecutor
+import com.atidevs.livewords.common.model.TranslationResult
 import com.atidevs.livewords.databinding.FragmentLiveTranslateBinding
 import com.google.common.util.concurrent.ListenableFuture
 import java.util.concurrent.Executor
@@ -87,9 +88,33 @@ class LiveTranslateFragment : Fragment() {
     }
 
     private fun init() {
-        liveTranslateViewModel.identifyLanguage()
         liveTranslateViewModel.sourceText.observe(viewLifecycleOwner) {
             binding.sourceText.text = it
+        }
+        liveTranslateViewModel.sourceLang.observe(viewLifecycleOwner) {
+            binding.sourceLang.text = it.langCode
+        }
+        liveTranslateViewModel.sourceText.observe(viewLifecycleOwner) {
+            binding.sourceText.text = it
+        }
+
+        liveTranslateViewModel.translatedText.observe(viewLifecycleOwner) { result ->
+            when (result) {
+                is TranslationResult.Success -> {
+                    binding.targetText.text = result.translation
+                }
+                is TranslationResult.Error -> {
+                    binding.targetText.text = result.error?.localizedMessage
+                }
+            }
+        }
+
+        liveTranslateViewModel.modelDownloading.observe(viewLifecycleOwner) { downloading ->
+            if (downloading) {
+                binding.progressBar.visibility = View.VISIBLE
+            } else {
+                binding.progressBar.visibility = View.GONE
+            }
         }
     }
 
@@ -128,7 +153,8 @@ class LiveTranslateFragment : Fragment() {
                         requireContext(),
                         lifecycle,
                         cameraExecutor,
-                        liveTranslateViewModel.sourceText
+                        liveTranslateViewModel.sourceText,
+                        liveTranslateViewModel.imageCropPercentages
                     )
                 )
             }
