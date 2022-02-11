@@ -92,7 +92,7 @@ class LiveTranslateFragment : Fragment() {
             binding.sourceText.text = it
         }
         liveTranslateViewModel.sourceLang.observe(viewLifecycleOwner) {
-            binding.sourceLang.text = it.langCode
+            binding.sourceLang.text = it.langName
         }
         liveTranslateViewModel.sourceText.observe(viewLifecycleOwner) {
             binding.sourceText.text = it

@@ -50,6 +50,9 @@ class LiveTranslateViewModel : ViewModel() {
     }
 
     init {
+        modelDownloading.value = false
+        translating.value = false
+
         // Identify language of the detected text
         sourceLang.addSource(sourceText) { text ->
             languageIdentifier.identifyLanguage(text)
@@ -88,7 +91,7 @@ class LiveTranslateViewModel : ViewModel() {
     private fun translate(): Task<String> {
         val text = sourceText.value ?: return Tasks.forResult("")
         val source = sourceLang.value ?: return Tasks.forResult("")
-        val target = targetLang.value ?: return Tasks.forResult("")
+        val target = Language("fr") //targetLang.value ?: return Tasks.forResult("")
 
         val sourceLangCode =
             TranslateLanguage.fromLanguageTag(source.langCode) ?: return Tasks.forCanceled()
@@ -97,16 +100,23 @@ class LiveTranslateViewModel : ViewModel() {
 
         val options = TranslatorOptions.Builder()
             .setSourceLanguage(sourceLangCode)
-            .setTargetLanguage(TranslateLanguage.FRENCH)
+            .setTargetLanguage(targetLangCode)
             .setExecutor(executor)
             .build()
 
         translator = Translation.getClient(options)
-        modelDownloading.value = true
 
-        modelDownloadTask = translator.downloadModelIfNeeded().addOnCompleteListener {
-            modelDownloading.value = false
+        if (modelDownloading.value != true) {
+            modelDownloading.value = true
         }
+
+        modelDownloadTask = translator.downloadModelIfNeeded()
+            .addOnCompleteListener {
+                modelDownloading.value = false
+            }
+            .addOnFailureListener {
+                modelDownloading.value = false
+            }
 
         translating.value = true
         return modelDownloadTask.onSuccessTask {
