@@ -5,31 +5,35 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewModelProvider
+import com.atidevs.livewords.common.ScopedExecutor
 import com.atidevs.livewords.databinding.FragmentLiveTranslateBinding
 import com.google.common.util.concurrent.ListenableFuture
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
-class LiveTranslateFragment() : Fragment() {
+class LiveTranslateFragment : Fragment() {
 
     private var _binding: FragmentLiveTranslateBinding? = null
     private val binding get() = _binding!!
 
-    lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
+    private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
 
-    private lateinit var liveTranslateViewModel: LiveTranslateViewModel
+    private val liveTranslateViewModel: LiveTranslateViewModel by viewModels()
 
     private lateinit var imageAnalysis: ImageAnalysis
+    private lateinit var camera: Camera
 
     private lateinit var cameraExecutor: Executor
+    private lateinit var scopedExecutor: ScopedExecutor
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,16 +44,14 @@ class LiveTranslateFragment() : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentLiveTranslateBinding.inflate(inflater, container, false)
-        liveTranslateViewModel = ViewModelProvider(this)[LiveTranslateViewModel::class.java]
         initCameraPreview()
         init()
         return binding.root
     }
 
     private fun init() {
-        cameraExecutor = Executors.newCachedThreadPool()
         liveTranslateViewModel.identifyLanguage()
         liveTranslateViewModel.sourceText.observe(viewLifecycleOwner) {
             binding.sourceLang.text = it
@@ -57,6 +59,8 @@ class LiveTranslateFragment() : Fragment() {
     }
 
     private fun initCameraPreview() {
+        cameraExecutor = Executors.newCachedThreadPool()
+        scopedExecutor = ScopedExecutor(cameraExecutor)
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
             bindPreview(cameraProvider)
@@ -79,7 +83,7 @@ class LiveTranslateFragment() : Fragment() {
                 .build()
 
         imageAnalysis.setAnalyzer(
-            ContextCompat.getMainExecutor(requireContext()),
+            scopedExecutor,
             TextAnalyzer(
                 requireContext(),
                 lifecycle,
@@ -88,7 +92,7 @@ class LiveTranslateFragment() : Fragment() {
             )
         )
 
-        val camera = cameraProvider.bindToLifecycle(
+        camera = cameraProvider.bindToLifecycle(
             this as LifecycleOwner,
             cameraSelector,
             imageAnalysis,
@@ -99,5 +103,6 @@ class LiveTranslateFragment() : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        scopedExecutor.shutDown()
     }
 }

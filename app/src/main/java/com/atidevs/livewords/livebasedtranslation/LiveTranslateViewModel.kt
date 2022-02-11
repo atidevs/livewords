@@ -14,7 +14,6 @@ class LiveTranslateViewModel : ViewModel() {
     private var _sourceText: MutableLiveData<String> = MutableLiveData()
     var sourceText: MutableLiveData<String> = _sourceText
 
-
     fun identifyLanguage() {
         _sourceText = Transformations.switchMap(sourceText) { text ->
             val result = MutableLiveData<String>()
