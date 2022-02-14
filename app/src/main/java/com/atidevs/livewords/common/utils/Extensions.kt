@@ -1,4 +1,4 @@
-package com.atidevs.livewords.common
+package com.atidevs.livewords.common.utils
 
 import android.graphics.Bitmap
 import android.graphics.Matrix

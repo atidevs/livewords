@@ -1,6 +1,5 @@
 package com.atidevs.livewords.livebasedtranslation
 
-import ImageUtils
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Rect
@@ -9,7 +8,8 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
-import com.atidevs.livewords.common.rotateAndCrop
+import com.atidevs.livewords.common.utils.rotateAndCrop
+import com.atidevs.livewords.common.utils.ImageUtils
 import com.google.android.gms.tasks.Task
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.Text
