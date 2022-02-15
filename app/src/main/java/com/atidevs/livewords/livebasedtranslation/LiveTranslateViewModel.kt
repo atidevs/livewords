@@ -7,9 +7,7 @@ import com.atidevs.livewords.common.Constants.CropPercent.HEIGHT_CROP_PERCENT
 import com.atidevs.livewords.common.Constants.CropPercent.WIDTH_CROP_PERCENT
 import com.atidevs.livewords.common.Constants.Throttle.SMOOTHING_DURATION
 import com.atidevs.livewords.common.DeferredMutableLiveData
-import com.atidevs.livewords.common.model.DetectionResult
-import com.atidevs.livewords.common.model.Language
-import com.atidevs.livewords.common.model.TranslationResult
+import com.atidevs.livewords.common.model.*
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
@@ -25,22 +23,27 @@ class LiveTranslateViewModel : ViewModel() {
 
     lateinit var executor: Executor
 
-    val imageCropPercentages = MutableLiveData<Pair<Int, Int>>()
-        .apply { value = Pair(HEIGHT_CROP_PERCENT, WIDTH_CROP_PERCENT) }
+    val imageCropPercent =
+        MutableLiveData(ImageCropPercent(HEIGHT_CROP_PERCENT, WIDTH_CROP_PERCENT))
 
     private lateinit var translator: Translator
 
     val sourceText: DeferredMutableLiveData<DetectionResult> =
         DeferredMutableLiveData(SMOOTHING_DURATION)
+
     val sourceLang: MediatorLiveData<Language> = MediatorLiveData()
     val targetLang: MutableLiveData<Language> = MutableLiveData()
-    val translatedText: MediatorLiveData<TranslationResult> = MediatorLiveData()
 
     private val translating: MutableLiveData<Boolean> = MutableLiveData()
+
     val modelDownloading: DeferredMutableLiveData<Boolean> =
+        DeferredMutableLiveData(SMOOTHING_DURATION)
+    val modelDownloadResult: DeferredMutableLiveData<ModelDownloadResult> =
         DeferredMutableLiveData(SMOOTHING_DURATION)
 
     private var modelDownloadTask: Task<Void> = Tasks.forCanceled()
+
+    val translationResult: MediatorLiveData<TranslationResult> = MediatorLiveData()
 
     val availableLanguages: List<Language> = TranslateLanguage.getAllLanguages().map {
         Language(it)
@@ -58,7 +61,7 @@ class LiveTranslateViewModel : ViewModel() {
         modelDownloading.setValue(false)
         translating.value = false
 
-        // Identify language of the detected text
+        // Identify language of the detected result from camera feed
         sourceLang.addSource(sourceText) { detectedResult ->
             when (detectedResult) {
                 is DetectionResult.Text -> {
@@ -79,23 +82,23 @@ class LiveTranslateViewModel : ViewModel() {
         // Translation task custom OnCompleteListener
         val processTranslation = OnCompleteListener<String> { task ->
             if (task.isSuccessful) {
-                translatedText.value = TranslationResult.Success(task.result)
+                translationResult.value = TranslationResult.Success(task.result)
             } else {
                 if (task.isCanceled) {
                     return@OnCompleteListener
                 }
-                translatedText.value = TranslationResult.Error(task.exception)
+                translationResult.value = TranslationResult.Error(task.exception)
             }
         }
 
         // Attach the OnCompleteListener to react to changes on each source
-        translatedText.addSource(sourceText) {
+        translationResult.addSource(sourceText) {
             translate().addOnCompleteListener(processTranslation)
         }
-        translatedText.addSource(sourceLang) {
+        translationResult.addSource(sourceLang) {
             translate().addOnCompleteListener(processTranslation)
         }
-        translatedText.addSource(targetLang) {
+        translationResult.addSource(targetLang) {
             translate().addOnCompleteListener(processTranslation)
         }
     }
@@ -103,6 +106,7 @@ class LiveTranslateViewModel : ViewModel() {
     // Translate text from source language to target language
     private fun translate(): Task<String> {
         val text = (sourceText.value as? DetectionResult.Text)?.text ?: return Tasks.forResult("")
+
         val source = sourceLang.value ?: return Tasks.forResult("")
         val target = targetLang.value ?: return Tasks.forResult("")
 
@@ -125,9 +129,13 @@ class LiveTranslateViewModel : ViewModel() {
 
         modelDownloadTask = translator.downloadModelIfNeeded()
             .addOnCompleteListener {
+                modelDownloadResult.setValue(ModelDownloadResult.Success)
                 modelDownloading.setValue(false)
             }
             .addOnFailureListener {
+                modelDownloadResult.setValue(
+                    ModelDownloadResult.Error(exception = it)
+                )
                 modelDownloading.setValue(false)
             }
 

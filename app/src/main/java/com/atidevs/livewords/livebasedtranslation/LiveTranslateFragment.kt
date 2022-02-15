@@ -1,6 +1,6 @@
 package com.atidevs.livewords.livebasedtranslation
 
-import android.graphics.*
+import android.graphics.PixelFormat
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
@@ -9,8 +9,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.camera.core.*
-import androidx.camera.core.Camera
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -21,7 +21,9 @@ import com.atidevs.livewords.common.Constants.AspectRatio.RATIO_16_BY_9
 import com.atidevs.livewords.common.Constants.AspectRatio.RATIO_4_BY_3
 import com.atidevs.livewords.common.ScopedExecutor
 import com.atidevs.livewords.common.model.Language
+import com.atidevs.livewords.common.model.ModelDownloadResult
 import com.atidevs.livewords.common.model.TranslationResult
+import com.atidevs.livewords.common.utils.drawOverlay
 import com.atidevs.livewords.databinding.FragmentLiveTranslateBinding
 import com.google.common.util.concurrent.ListenableFuture
 import java.util.concurrent.Executor
@@ -72,8 +74,8 @@ class LiveTranslateFragment : Fragment() {
             holder.setFormat(PixelFormat.TRANSPARENT)
             holder.addCallback(object : SurfaceHolder.Callback {
                 override fun surfaceCreated(holder: SurfaceHolder) {
-                    liveTranslateViewModel.imageCropPercentages.observe(viewLifecycleOwner) {
-                        drawOverlay(holder, it.first, it.second)
+                    liveTranslateViewModel.imageCropPercent.observe(viewLifecycleOwner) { cropPercent ->
+                        holder.drawOverlay(requireContext(), cropPercent.height, cropPercent.width)
                     }
                 }
 
@@ -122,13 +124,38 @@ class LiveTranslateFragment : Fragment() {
             binding.sourceText.text = it.result
         }
 
-        liveTranslateViewModel.translatedText.observe(viewLifecycleOwner) { result ->
+        liveTranslateViewModel.modelDownloadResult.observe(viewLifecycleOwner) {
+            when (it) {
+                is ModelDownloadResult.Success -> {
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.model_downloaded_succes_message),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                is ModelDownloadResult.Error -> {
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.model_downloading_error_message),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+
+        liveTranslateViewModel.modelDownloading.observe(viewLifecycleOwner) { downloading ->
+            if (downloading) {
+                binding.targetText.text = getString(R.string.model_downloading_message)
+            }
+        }
+
+        liveTranslateViewModel.translationResult.observe(viewLifecycleOwner) { result ->
             when (result) {
                 is TranslationResult.Success -> {
                     binding.targetText.text = result.translation
                 }
                 is TranslationResult.Error -> {
-                    binding.targetText.text = result.error?.localizedMessage
+                    binding.targetText.text = getString(R.string.translation_error_message)
                 }
             }
         }
@@ -174,11 +201,10 @@ class LiveTranslateFragment : Fragment() {
                 setAnalyzer(
                     scopedExecutor,
                     TextAnalyzer(
-                        requireContext(),
                         lifecycle,
                         cameraExecutor,
                         liveTranslateViewModel.sourceText,
-                        liveTranslateViewModel.imageCropPercentages
+                        liveTranslateViewModel.imageCropPercent
                     )
                 )
             }
@@ -211,56 +237,6 @@ class LiveTranslateFragment : Fragment() {
             return AspectRatio.RATIO_4_3
         }
         return AspectRatio.RATIO_16_9
-    }
-
-    private fun drawOverlay(
-        holder: SurfaceHolder,
-        heightCropPercent: Int,
-        widthCropPercent: Int
-    ) {
-        val canvas = holder.lockCanvas()
-        val backgroundPaint = Paint().apply {
-            alpha = 120
-        }
-
-        canvas.drawPaint(backgroundPaint)
-
-        val rectPaint = Paint()
-        rectPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
-        rectPaint.style = Paint.Style.FILL
-        rectPaint.color = Color.WHITE
-
-        val outlinePaint = Paint()
-        outlinePaint.style = Paint.Style.STROKE
-        outlinePaint.color = Color.WHITE
-        outlinePaint.strokeWidth = 5f
-
-        val surfaceWidth = holder.surfaceFrame.width()
-        val surfaceHeight = holder.surfaceFrame.height()
-
-        val cornerRadius = 25f
-        val recTop = surfaceHeight * heightCropPercent / 2 / 100f
-        val rectLeft = surfaceWidth * widthCropPercent / 2 / 100f
-        val rectRight = surfaceWidth * (1 - widthCropPercent / 2 / 100f)
-        val rectBottom = surfaceHeight * (1 - heightCropPercent / 2 / 100f)
-        val rect = RectF(rectLeft, recTop, rectRight, rectBottom)
-
-        canvas.drawRoundRect(rect, cornerRadius, cornerRadius, rectPaint)
-
-        canvas.drawRoundRect(rect, cornerRadius, cornerRadius, outlinePaint)
-
-        val textPaint = Paint()
-        textPaint.color = Color.WHITE
-        textPaint.textSize = 50F
-
-        val overlayText = getString(R.string.center_text_label)
-        val textBounds = Rect()
-        textPaint.getTextBounds(overlayText, 0, overlayText.length, textBounds)
-        val textX = (surfaceWidth - textBounds.width()) / 2f
-        val textY = rectBottom + textBounds.height() + 15f
-
-        canvas.drawText(overlayText, textX, textY, textPaint)
-        holder.unlockCanvasAndPost(canvas)
     }
 
     override fun onDestroyView() {

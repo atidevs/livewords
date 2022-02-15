@@ -1,31 +1,28 @@
 package com.atidevs.livewords.livebasedtranslation
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.Rect
-import android.util.Log
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
 import com.atidevs.livewords.common.model.DetectionResult
-import com.atidevs.livewords.common.utils.rotateAndCrop
+import com.atidevs.livewords.common.model.ImageCropPercent
 import com.atidevs.livewords.common.utils.ImageUtils
+import com.atidevs.livewords.common.utils.rotateAndCrop
 import com.google.android.gms.tasks.Task
 import com.google.mlkit.common.MlKitException
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
-import java.lang.Exception
 import java.util.concurrent.Executor
 
 class TextAnalyzer(
-    private val context: Context,
     lifecycle: Lifecycle,
     executor: Executor,
     private val result: MutableLiveData<DetectionResult>,
-    private val imageCropPercent: MutableLiveData<Pair<Int, Int>>
+    private val imageCropPercent: MutableLiveData<ImageCropPercent>
 ) : ImageAnalysis.Analyzer {
 
     private val detector =
@@ -54,15 +51,15 @@ class TextAnalyzer(
 
         val currentCropPercentages = imageCropPercent.value ?: return
         if (actualAspectRatio > 3) {
-            val originalHeightCropPercentage = currentCropPercentages.first
-            val originalWidthCropPercentage = currentCropPercentages.second
+            val originalHeightCropPercentage = currentCropPercentages.height
+            val originalWidthCropPercentage = currentCropPercentages.width
             imageCropPercent.value =
-                Pair(originalHeightCropPercentage / 2, originalWidthCropPercentage)
+                ImageCropPercent(originalHeightCropPercentage / 2, originalWidthCropPercentage)
         }
 
         val cropPercentages = imageCropPercent.value ?: return
-        val heightCropPercent = cropPercentages.first
-        val widthCropPercent = cropPercentages.second
+        val heightCropPercent = cropPercentages.height
+        val widthCropPercent = cropPercentages.width
         val (widthCrop, heightCrop) = when (rotationDegrees) {
             90, 270 -> Pair(heightCropPercent / 100f, widthCropPercent / 100f)
             else -> Pair(widthCropPercent / 100f, heightCropPercent / 100f)
@@ -90,7 +87,6 @@ class TextAnalyzer(
             }
             .addOnFailureListener { exception ->
                 result.value = DetectionResult.Error(getErrorMessage(exception))
-                Log.e("TextAnalyzer", "Text recognition error", exception)
             }
     }
 

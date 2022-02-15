@@ -10,4 +10,8 @@
     <string name="content_desc_translation_api_attribution">Powered by Google Translate</string>
     <string name="label_source_language">Source language</string>
     <string name="center_text_label">Center text in box</string>
+    <string name="model_downloading_message">…</string>
+    <string name="model_downloaded_succes_message">Translation model downloaded successfully.</string>
+    <string name="model_downloading_error_message">Error downloading translation.</string>
+    <string name="translation_error_message">Error translating, please try aiming at your text.</string>
 </resources>
