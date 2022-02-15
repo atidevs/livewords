@@ -3,10 +3,13 @@ package com.atidevs.livewords.livebasedtranslation
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.atidevs.livewords.common.Constants.CropPercent.HEIGHT_CROP_PERCENT
+import com.atidevs.livewords.common.Constants.CropPercent.WIDTH_CROP_PERCENT
+import com.atidevs.livewords.common.Constants.Throttle.SMOOTHING_DURATION
+import com.atidevs.livewords.common.DeferredMutableLiveData
+import com.atidevs.livewords.common.model.DetectionResult
 import com.atidevs.livewords.common.model.Language
 import com.atidevs.livewords.common.model.TranslationResult
-import com.atidevs.livewords.livebasedtranslation.LiveTranslateFragment.Companion.HEIGHT_CROP_PERCENT
-import com.atidevs.livewords.livebasedtranslation.LiveTranslateFragment.Companion.WIDTH_CROP_PERCENT
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
@@ -27,13 +30,15 @@ class LiveTranslateViewModel : ViewModel() {
 
     private lateinit var translator: Translator
 
-    val sourceText: MutableLiveData<String> = MutableLiveData()
+    val sourceText: DeferredMutableLiveData<DetectionResult> =
+        DeferredMutableLiveData(SMOOTHING_DURATION)
     val sourceLang: MediatorLiveData<Language> = MediatorLiveData()
     private val targetLang: MutableLiveData<Language> = MutableLiveData()
     val translatedText: MediatorLiveData<TranslationResult> = MediatorLiveData()
 
     private val translating: MutableLiveData<Boolean> = MutableLiveData()
-    val modelDownloading: MutableLiveData<Boolean> = MutableLiveData()
+    val modelDownloading: DeferredMutableLiveData<Boolean> =
+        DeferredMutableLiveData(SMOOTHING_DURATION)
 
     private var modelDownloadTask: Task<Void> = Tasks.forCanceled()
 
@@ -50,17 +55,25 @@ class LiveTranslateViewModel : ViewModel() {
     }
 
     init {
-        modelDownloading.value = false
+        modelDownloading.setValue(false)
         translating.value = false
 
         // Identify language of the detected text
-        sourceLang.addSource(sourceText) { text ->
-            languageIdentifier.identifyLanguage(text)
-                .addOnSuccessListener { identifiedLangCode ->
-                    if (identifiedLangCode != "und") {
-                        sourceLang.value = Language(identifiedLangCode)
-                    }
+        sourceLang.addSource(sourceText) { detectedResult ->
+            when (detectedResult) {
+                is DetectionResult.Text -> {
+                    languageIdentifier.identifyLanguage(detectedResult.text)
+                        .addOnSuccessListener { identifiedLangCode ->
+                            if (identifiedLangCode != "und") {
+                                sourceLang.value = Language(identifiedLangCode)
+                            }
+                        }
                 }
+                is DetectionResult.Error -> {
+
+                }
+            }
+
         }
 
         // Translation task custom OnCompleteListener
@@ -89,7 +102,7 @@ class LiveTranslateViewModel : ViewModel() {
 
     // Translate text from source language to target language
     private fun translate(): Task<String> {
-        val text = sourceText.value ?: return Tasks.forResult("")
+        val text = (sourceText.value as? DetectionResult.Text)?.text ?: return Tasks.forResult("")
         val source = sourceLang.value ?: return Tasks.forResult("")
         val target = Language("fr") //targetLang.value ?: return Tasks.forResult("")
 
@@ -107,15 +120,15 @@ class LiveTranslateViewModel : ViewModel() {
         translator = Translation.getClient(options)
 
         if (modelDownloading.value != true) {
-            modelDownloading.value = true
+            modelDownloading.setValue(true)
         }
 
         modelDownloadTask = translator.downloadModelIfNeeded()
             .addOnCompleteListener {
-                modelDownloading.value = false
+                modelDownloading.setValue(false)
             }
             .addOnFailureListener {
-                modelDownloading.value = false
+                modelDownloading.setValue(false)
             }
 
         translating.value = true

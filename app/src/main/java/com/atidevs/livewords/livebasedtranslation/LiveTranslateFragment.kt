@@ -15,6 +15,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
 import com.atidevs.livewords.R
+import com.atidevs.livewords.common.Constants.AspectRatio.RATIO_16_BY_9
+import com.atidevs.livewords.common.Constants.AspectRatio.RATIO_4_BY_3
 import com.atidevs.livewords.common.ScopedExecutor
 import com.atidevs.livewords.common.model.TranslationResult
 import com.atidevs.livewords.databinding.FragmentLiveTranslateBinding
@@ -41,12 +43,6 @@ class LiveTranslateFragment : Fragment() {
     private lateinit var cameraExecutor: Executor
     private lateinit var scopedExecutor: ScopedExecutor
 
-    companion object {
-        const val RATIO_4_BY_3 = 4.0 / 3.0
-        const val RATIO_16_BY_9 = 16.0 / 9.0
-        const val WIDTH_CROP_PERCENT = 8
-        const val HEIGHT_CROP_PERCENT = 74
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,13 +85,13 @@ class LiveTranslateFragment : Fragment() {
 
     private fun init() {
         liveTranslateViewModel.sourceText.observe(viewLifecycleOwner) {
-            binding.sourceText.text = it
+            binding.sourceText.text = it.result
         }
         liveTranslateViewModel.sourceLang.observe(viewLifecycleOwner) {
             binding.sourceLang.text = it.langName
         }
         liveTranslateViewModel.sourceText.observe(viewLifecycleOwner) {
-            binding.sourceText.text = it
+            binding.sourceText.text = it.result
         }
 
         liveTranslateViewModel.translatedText.observe(viewLifecycleOwner) { result ->

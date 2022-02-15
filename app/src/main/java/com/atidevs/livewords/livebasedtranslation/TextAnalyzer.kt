@@ -8,20 +8,23 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
+import com.atidevs.livewords.common.model.DetectionResult
 import com.atidevs.livewords.common.utils.rotateAndCrop
 import com.atidevs.livewords.common.utils.ImageUtils
 import com.google.android.gms.tasks.Task
+import com.google.mlkit.common.MlKitException
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import java.lang.Exception
 import java.util.concurrent.Executor
 
 class TextAnalyzer(
     private val context: Context,
     lifecycle: Lifecycle,
     executor: Executor,
-    private val result: MutableLiveData<String>,
+    private val result: MutableLiveData<DetectionResult>,
     private val imageCropPercent: MutableLiveData<Pair<Int, Int>>
 ) : ImageAnalysis.Analyzer {
 
@@ -83,10 +86,18 @@ class TextAnalyzer(
     private fun recognizeText(inputImage: InputImage): Task<Text> {
         return detector.process(inputImage)
             .addOnSuccessListener { recognizedText ->
-                result.value = recognizedText.text
+                result.value = DetectionResult.Text(recognizedText.text)
             }
             .addOnFailureListener { exception ->
+                result.value = DetectionResult.Error(getErrorMessage(exception))
                 Log.e("TextAnalyzer", "Text recognition error", exception)
             }
+    }
+
+    private fun getErrorMessage(exception: Exception): String {
+        return when (exception) {
+            is MlKitException -> "Awaiting text recognition model to be downloaded"
+            else -> "Sorry, an error occurred"
+        }
     }
 }
