@@ -95,9 +95,11 @@ class TextAnalyzer(
     }
 
     private fun getErrorMessage(exception: Exception): String {
-        return when (exception) {
-            is MlKitException -> "Awaiting text recognition model to be downloaded"
-            else -> "Sorry, an error occurred"
+        if (exception is MlKitException) {
+            if (exception.errorCode == MlKitException.UNAVAILABLE) {
+                return "Awaiting text recognition model to be downloaded"
+            }
         }
+        return "Sorry, an error occurred"
     }
 }

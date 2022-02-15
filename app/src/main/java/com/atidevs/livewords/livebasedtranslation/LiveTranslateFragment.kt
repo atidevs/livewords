@@ -7,6 +7,8 @@ import android.view.LayoutInflater
 import android.view.SurfaceHolder
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.camera.core.*
 import androidx.camera.core.Camera
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -18,6 +20,7 @@ import com.atidevs.livewords.R
 import com.atidevs.livewords.common.Constants.AspectRatio.RATIO_16_BY_9
 import com.atidevs.livewords.common.Constants.AspectRatio.RATIO_4_BY_3
 import com.atidevs.livewords.common.ScopedExecutor
+import com.atidevs.livewords.common.model.Language
 import com.atidevs.livewords.common.model.TranslationResult
 import com.atidevs.livewords.databinding.FragmentLiveTranslateBinding
 import com.google.common.util.concurrent.ListenableFuture
@@ -81,6 +84,31 @@ class LiveTranslateFragment : Fragment() {
         }
 
         init()
+        initSpinner()
+    }
+
+    private fun initSpinner() {
+        val adapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_spinner_dropdown_item,
+            liveTranslateViewModel.availableLanguages
+        )
+
+        binding.targetLangSpinner.adapter = adapter
+        binding.targetLangSpinner.setSelection(adapter.getPosition(Language("en")))
+        binding.targetLangSpinner.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    liveTranslateViewModel.targetLang.value = adapter.getItem(position)
+                }
+
+                override fun onNothingSelected(p0: AdapterView<*>?) {}
+            }
     }
 
     private fun init() {

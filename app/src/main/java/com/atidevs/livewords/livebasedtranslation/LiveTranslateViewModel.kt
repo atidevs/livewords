@@ -33,7 +33,7 @@ class LiveTranslateViewModel : ViewModel() {
     val sourceText: DeferredMutableLiveData<DetectionResult> =
         DeferredMutableLiveData(SMOOTHING_DURATION)
     val sourceLang: MediatorLiveData<Language> = MediatorLiveData()
-    private val targetLang: MutableLiveData<Language> = MutableLiveData()
+    val targetLang: MutableLiveData<Language> = MutableLiveData()
     val translatedText: MediatorLiveData<TranslationResult> = MediatorLiveData()
 
     private val translating: MutableLiveData<Boolean> = MutableLiveData()
@@ -104,7 +104,7 @@ class LiveTranslateViewModel : ViewModel() {
     private fun translate(): Task<String> {
         val text = (sourceText.value as? DetectionResult.Text)?.text ?: return Tasks.forResult("")
         val source = sourceLang.value ?: return Tasks.forResult("")
-        val target = Language("fr") //targetLang.value ?: return Tasks.forResult("")
+        val target = targetLang.value ?: return Tasks.forResult("")
 
         val sourceLangCode =
             TranslateLanguage.fromLanguageTag(source.langCode) ?: return Tasks.forCanceled()

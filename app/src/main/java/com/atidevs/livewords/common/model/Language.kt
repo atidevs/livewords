@@ -7,4 +7,8 @@ data class Language(
 ) {
     val langName: String
         get() = Locale(langCode).displayName
+
+    override fun toString(): String {
+        return langName
+    }
 }
