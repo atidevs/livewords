@@ -70,7 +70,7 @@ class TextAnalyzer(
             (imageHeight * heightCrop / 2).toInt()
         )
 
-        val imageToBitmap = ImageUtils.convertYuv420888ImageToBitmap(image)
+        val imageToBitmap = ImageUtils.convertToBitmap(image)
         val croppedBitmap = imageToBitmap.rotateAndCrop(rotationDegrees, cropRect)
 
         recognizeText(InputImage.fromBitmap(croppedBitmap, 0))
@@ -79,7 +79,7 @@ class TextAnalyzer(
             }
     }
 
-    // Detect text from camera feed
+    // Detect text from image provided by the image analyzer
     private fun recognizeText(inputImage: InputImage): Task<Text> {
         return detector.process(inputImage)
             .addOnSuccessListener { recognizedText ->

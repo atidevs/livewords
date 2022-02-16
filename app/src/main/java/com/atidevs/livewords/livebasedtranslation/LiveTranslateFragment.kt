@@ -85,11 +85,11 @@ class LiveTranslateFragment : Fragment() {
             })
         }
 
-        init()
-        initSpinner()
+        initObservers()
+        initLanguageSelector()
     }
 
-    private fun initSpinner() {
+    private fun initLanguageSelector() {
         val adapter = ArrayAdapter(
             requireContext(),
             android.R.layout.simple_spinner_dropdown_item,
@@ -113,7 +113,7 @@ class LiveTranslateFragment : Fragment() {
             }
     }
 
-    private fun init() {
+    private fun initObservers() {
         liveTranslateViewModel.sourceText.observe(viewLifecycleOwner) {
             binding.sourceText.text = it.result
         }
