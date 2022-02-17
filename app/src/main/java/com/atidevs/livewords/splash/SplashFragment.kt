@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.atidevs.livewords.MainActivity
@@ -18,7 +19,7 @@ class SplashFragment : Fragment() {
 
     private var _binding: FragmentSplashBinding? = null
 
-    private var splashViewModel: SplashViewModel? = null
+    private val splashViewModel: SplashViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -26,7 +27,6 @@ class SplashFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSplashBinding.inflate(inflater, container, false)
-        splashViewModel = ViewModelProvider(this)[SplashViewModel::class.java]
         binding.viewModel = splashViewModel
         binding.lifecycleOwner = viewLifecycleOwner
         return binding.root
@@ -36,7 +36,6 @@ class SplashFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initViews()
         (requireActivity() as? MainActivity)?.checkAppPermission()
-        //splashViewModel?.init()
     }
 
     private fun initViews() {
@@ -45,7 +44,7 @@ class SplashFragment : Fragment() {
             (requireActivity() as? MainActivity)?.launchPermissionDialog()
         }
 
-        splashViewModel?.showLoading?.observe(viewLifecycleOwner) { shouldShowLoading ->
+        splashViewModel.showLoading.observe(viewLifecycleOwner) { shouldShowLoading ->
             if (shouldShowLoading) {
                 binding.loading.visibility = View.VISIBLE
                 binding.loading.animate()
@@ -55,7 +54,7 @@ class SplashFragment : Fragment() {
             }
         }
 
-        splashViewModel?.isPermissionGranted?.observe(viewLifecycleOwner) { isGranted ->
+        splashViewModel.isPermissionGranted.observe(viewLifecycleOwner) { isGranted ->
             if (isGranted) {
                 navigateToLiveTranslationScreen()
             } else {
@@ -63,7 +62,7 @@ class SplashFragment : Fragment() {
             }
         }
 
-        splashViewModel?.navigateTo?.observe(viewLifecycleOwner) {
+        splashViewModel.navigateTo.observe(viewLifecycleOwner) {
             when (it) {
                 Destination.TextTranslationScreen -> {
                     navigateToTextTranslationScreen()
@@ -91,6 +90,6 @@ class SplashFragment : Fragment() {
     }
 
     fun handlePermissionResult(isGranted: Boolean) {
-        splashViewModel?.handlePermissionResult(isGranted)
+        splashViewModel.handlePermissionResult(isGranted)
     }
 }

@@ -23,7 +23,7 @@ fun Bitmap.rotateAndCrop(
 }
 
 // Draw guiding rectangle on the surface
-// This will guide the user to center to desired text to translate!
+// This will guide the user to center the desired text to translate!
 fun SurfaceHolder.drawOverlay(
     context: Context,
     heightCropPercent: Int,

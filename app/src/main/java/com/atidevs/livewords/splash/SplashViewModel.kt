@@ -19,27 +19,11 @@ class SplashViewModel : ViewModel() {
     private val _navigateTo: MutableLiveData<Destination> = MutableLiveData()
     val navigateTo: LiveData<Destination> = _navigateTo
 
-    fun init() {
-        viewModelScope.launch {
-            _showLoading.value = true
-            delay(6000L)
-            _showLoading.value = false
-        }
-    }
-
-    fun checkPermission() {
-
-    }
-
     fun handlePermissionResult(isGranted: Boolean) {
         _isPermissionGranted.value = isGranted
     }
 
     fun navigateToTextBasedExperience() {
         _navigateTo.value = Destination.TextTranslationScreen
-    }
-
-    fun navigateTo(destination: Destination) {
-        _navigateTo.value = destination
     }
 }

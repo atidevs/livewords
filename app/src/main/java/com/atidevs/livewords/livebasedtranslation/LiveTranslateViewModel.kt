@@ -49,6 +49,7 @@ class LiveTranslateViewModel : ViewModel() {
         Language(it)
     }
 
+    // Instantiate a language identifier
     private val languageIdentifier by lazy {
         LanguageIdentification.getClient(
             LanguageIdentificationOptions.Builder()
@@ -105,6 +106,8 @@ class LiveTranslateViewModel : ViewModel() {
 
     // Translate text from source language to target language
     private fun translate(): Task<String> {
+
+        // Extract source language and target language codes
         val text = (sourceText.value as? DetectionResult.Text)?.text ?: return Tasks.forResult("")
 
         val source = sourceLang.value ?: return Tasks.forResult("")
@@ -115,6 +118,7 @@ class LiveTranslateViewModel : ViewModel() {
         val targetLangCode =
             TranslateLanguage.fromLanguageTag(target.langCode) ?: return Tasks.forCanceled()
 
+        // Prepare translation options and feed them to the translator instance
         val options = TranslatorOptions.Builder()
             .setSourceLanguage(sourceLangCode)
             .setTargetLanguage(targetLangCode)
@@ -127,6 +131,7 @@ class LiveTranslateViewModel : ViewModel() {
             modelDownloading.setValue(true)
         }
 
+        // Prepare a task for downloading translation models if not already downloaded
         modelDownloadTask = translator.downloadModelIfNeeded()
             .addOnCompleteListener {
                 modelDownloadResult.setValue(ModelDownloadResult.Success)
@@ -141,6 +146,7 @@ class LiveTranslateViewModel : ViewModel() {
 
         translating.value = true
         return modelDownloadTask.onSuccessTask {
+            // Once translation model download task completed start the translation
             translator.translate(text)
         }.addOnCompleteListener {
             translating.value = false

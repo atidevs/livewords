@@ -177,11 +177,11 @@ class LiveTranslateFragment : Fragment() {
 
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
-            bindCameraPreview(cameraProvider)
+            bindCameraUseCase(cameraProvider)
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 
-    private fun bindCameraPreview(cameraProvider: ProcessCameraProvider) {
+    private fun bindCameraUseCase(cameraProvider: ProcessCameraProvider) {
         val metrics = DisplayMetrics().also { binding.previewView.display.getRealMetrics(it) }
 
         val screenAspectRatio = getAspectRatio(metrics.widthPixels, metrics.heightPixels)

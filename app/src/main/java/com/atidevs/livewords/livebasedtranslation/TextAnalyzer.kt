@@ -25,6 +25,7 @@ class TextAnalyzer(
     private val imageCropPercent: MutableLiveData<ImageCropPercent>
 ) : ImageAnalysis.Analyzer {
 
+    // Retrieve a TextRecognition instance
     private val detector =
         TextRecognition.getClient(
             TextRecognizerOptions.Builder()
