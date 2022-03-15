@@ -1,5 +1,7 @@
 package com.atidevs.livewords.livebasedtranslation
 
+import androidx.camera.core.CameraSelector.LENS_FACING_BACK
+import androidx.camera.core.CameraSelector.LENS_FACING_FRONT
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -48,6 +50,8 @@ class LiveTranslateViewModel : ViewModel() {
     val availableLanguages: List<Language> = TranslateLanguage.getAllLanguages().map {
         Language(it)
     }
+
+    val switchCamera: MutableLiveData<Int> = MutableLiveData()
 
     // Instantiate a language identifier
     private val languageIdentifier by lazy {
@@ -151,6 +155,11 @@ class LiveTranslateViewModel : ViewModel() {
         }.addOnCompleteListener {
             translating.value = false
         }
+    }
+
+    fun switchCamera() {
+        switchCamera.value =
+            if (switchCamera.value == null || switchCamera.value == LENS_FACING_BACK) LENS_FACING_FRONT else LENS_FACING_BACK
     }
 
     override fun onCleared() {

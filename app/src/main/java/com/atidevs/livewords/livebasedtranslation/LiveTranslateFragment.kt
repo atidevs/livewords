@@ -48,6 +48,10 @@ class LiveTranslateFragment : Fragment() {
     private lateinit var cameraExecutor: Executor
     private lateinit var scopedExecutor: ScopedExecutor
 
+    private lateinit var cameraSelector: CameraSelector
+    private lateinit var cameraProvider: ProcessCameraProvider
+    private lateinit var preview: Preview
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,9 +64,8 @@ class LiveTranslateFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentLiveTranslateBinding.inflate(inflater, container, false)
-
+        binding.viewModel = liveTranslateViewModel
         initCameraPreview()
-
         return binding.root
     }
 
@@ -124,6 +127,10 @@ class LiveTranslateFragment : Fragment() {
             binding.sourceText.text = it.result
         }
 
+        liveTranslateViewModel.switchCamera.observe(viewLifecycleOwner) {
+            bind(cameraProvider, preview, it)
+        }
+
         liveTranslateViewModel.modelDownloadResult.observe(viewLifecycleOwner) {
             when (it) {
                 is ModelDownloadResult.Success -> {
@@ -176,7 +183,7 @@ class LiveTranslateFragment : Fragment() {
         liveTranslateViewModel.executor = cameraExecutor
 
         cameraProviderFuture.addListener({
-            val cameraProvider = cameraProviderFuture.get()
+            cameraProvider = cameraProviderFuture.get()
             bindCameraUseCase(cameraProvider)
         }, ContextCompat.getMainExecutor(requireContext()))
     }
@@ -188,7 +195,7 @@ class LiveTranslateFragment : Fragment() {
 
         val rotation = binding.previewView.display.rotation
 
-        val preview: Preview = Preview.Builder()
+        preview = Preview.Builder()
             .setTargetAspectRatio(screenAspectRatio)
             .setTargetRotation(rotation)
             .build()
@@ -209,9 +216,19 @@ class LiveTranslateFragment : Fragment() {
                 )
             }
 
-        val cameraSelector: CameraSelector = CameraSelector.Builder()
+        bind(cameraProvider, preview, CameraSelector.LENS_FACING_BACK)
+
+    }
+
+    private fun bind(
+        cameraProvider: ProcessCameraProvider,
+        previewUseCase: Preview,
+        cameraLens: Int
+    ) {
+
+        cameraSelector = CameraSelector.Builder()
             .requireLensFacing(
-                CameraSelector.LENS_FACING_BACK
+                cameraLens
             ).build()
 
         try {
@@ -221,10 +238,10 @@ class LiveTranslateFragment : Fragment() {
                 this as LifecycleOwner,
                 cameraSelector,
                 imageAnalysis,
-                preview
+                previewUseCase
             )
 
-            preview.setSurfaceProvider(binding.previewView.surfaceProvider)
+            previewUseCase.setSurfaceProvider(binding.previewView.surfaceProvider)
         } catch (e: IllegalStateException) {
         }
     }
